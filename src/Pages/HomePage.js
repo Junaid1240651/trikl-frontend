@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Draggable from "react-draggable";
+import LoadinScreen from "../Components/LoadingScreen/LoadingScreen";
 
 const HomePage = () => {
-  const [imageData, setImageData] = useState(null);
+  const [imageData, setImageData] = useState();
   const [textBoxes, setTextBoxes] = useState([]);
   const [isTextAreaVisible, setIsTextAreaVisible] = useState(false);
   const [selectedTextArea, setSelectedTextArea] = useState(null);
@@ -62,53 +63,61 @@ const HomePage = () => {
   console.log(textBoxes);
 
   return (
-    <div>
-      {imageData && (
-        <img
-          src={imageData}
-          alt="imag"
-          style={{ width: "100%", height: "100vh" }}
-          onClick={handleImageClick}
-        />
+    <>
+      {imageData ? (
+        <div className="main-Div" alt="imag" style={{ width: "100%" }}>
+          {imageData && (
+            <img
+              src={imageData}
+              alt="imag"
+              style={{ width: "100%", height: "100vh" }}
+              onClick={handleImageClick}
+            />
+          )}
+          {textBoxes.map((textBox) => (
+            <Draggable
+              key={textBox.id}
+              position={textBox.position}
+              onDrag={(e, data) => handleTextDrag(textBox.id, e, data)}
+            >
+              <textarea
+                spellcheck="false"
+                style={{
+                  resize: "none",
+                  background: "transparent",
+                  border:
+                    selectedTextArea === textBox.id ||
+                    textBox.text.length === 0 ||
+                    clickCheck === 1
+                      ? "2px solid red"
+                      : "none",
+                  fontSize: "30px",
+                  height: "35px",
+                  width: `${Math.max(20, textBox.text.length * 20)}px`,
+                  color: "red",
+                  overflow: "hidden",
+                  outline: "none",
+                  fontWeight: "bold",
+                }}
+                value={textBox.text}
+                onClick={() => setSelectedTextArea(textBox.id)}
+                onChange={(e) =>
+                  setTextBoxes((prevTextBoxes) =>
+                    prevTextBoxes.map((tb) =>
+                      tb.id === textBox.id
+                        ? { ...tb, text: e.target.value }
+                        : tb
+                    )
+                  )
+                }
+              />
+            </Draggable>
+          ))}
+        </div>
+      ) : (
+        <LoadinScreen />
       )}
-      {textBoxes.map((textBox) => (
-        <Draggable
-          key={textBox.id}
-          position={textBox.position}
-          onDrag={(e, data) => handleTextDrag(textBox.id, e, data)}
-        >
-          <textarea
-            spellcheck="false"
-            style={{
-              resize: "none",
-              background: "transparent",
-              border:
-                selectedTextArea === textBox.id ||
-                textBox.text.length === 0 ||
-                clickCheck === 1
-                  ? "2px solid red"
-                  : "none",
-              fontSize: "30px",
-              height: "35px",
-              width: `${Math.max(20, textBox.text.length * 20)}px`,
-              color: "red",
-              overflow: "hidden",
-              outline: "none",
-              fontWeight: "bold",
-            }}
-            value={textBox.text}
-            onClick={() => setSelectedTextArea(textBox.id)}
-            onChange={(e) =>
-              setTextBoxes((prevTextBoxes) =>
-                prevTextBoxes.map((tb) =>
-                  tb.id === textBox.id ? { ...tb, text: e.target.value } : tb
-                )
-              )
-            }
-          />
-        </Draggable>
-      ))}
-    </div>
+    </>
   );
 };
 
